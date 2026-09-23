@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GCP Brands Executive Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDEC; --panel:#F7F9F8; --ink:#1C2630; --muted:#5E6B75; --line:#CBD3D6;
+  --red:#C3362B; --amber:#C98A0E; --green:#2E6F5B;
+  --p1:#C3362B; --p2:#D69414; --p3:#3E6E8E; --p4:#9AA6AE;
+  --prog:#2E6F5B; --anal:#D69414; --tbd:#8C6BB1; --fut:#B7C0C6;
+  --sans:"Archivo","Helvetica Neue",Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161C21; --panel:#1E262D; --ink:#E4E9EB; --muted:#9AA7B0; --line:#33404A;
+    --red:#E35A4E; --amber:#E8AA30; --green:#4FA488;
+    --p1:#E35A4E; --p2:#E8AA30; --p3:#6FA0C2; --p4:#6E7B84;
+    --prog:#4FA488; --anal:#E8AA30; --tbd:#A88BD0; --fut:#4A5660;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161C21; --panel:#1E262D; --ink:#E4E9EB; --muted:#9AA7B0; --line:#33404A;
+  --red:#E35A4E; --amber:#E8AA30; --green:#4FA488;
+  --p1:#E35A4E; --p2:#E8AA30; --p3:#6FA0C2; --p4:#6E7B84;
+  --prog:#4FA488; --anal:#E8AA30; --tbd:#A88BD0; --fut:#4A5660;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 56px}
+h1{font-stretch:78%;font-weight:800;font-size:clamp(28px,4.4vw,42px);line-height:1.05;margin:0}
+h2{font-stretch:85%;font-weight:700;font-size:21px;margin:0 0 4px}
+h3{font-stretch:88%;font-weight:700;font-size:16px;margin:0}
+.sub{color:var(--muted);margin:0 0 14px;font-size:14px}
+.muted{color:var(--muted)}
+header{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:flex-end;justify-content:space-between;padding-bottom:18px;border-bottom:2px solid var(--ink)}
+header .meta{color:var(--muted);font-size:14px;max-width:420px;margin:0}
+header .meta a{color:inherit}
+
+/* verdict band */
+.verdict{margin-top:22px;display:grid;grid-template-columns:auto 1fr;gap:6px 18px;align-items:center;padding:18px 20px;border-radius:6px;border-left:8px solid var(--red);background:color-mix(in srgb,var(--red) 9%,var(--panel))}
+.verdict .lamp{width:18px;height:18px;border-radius:50%;background:var(--red);box-shadow:0 0 0 5px color-mix(in srgb,var(--red) 25%,transparent)}
+.verdict b{font-stretch:80%;font-weight:800;font-size:24px;line-height:1.15}
+.verdict p{grid-column:2;margin:0;max-width:78ch}
+
+/* KPI strip */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--line);border-radius:6px;background:var(--panel);margin-top:16px}
+.kpi{padding:14px 16px;border-right:1px solid var(--line)}
+.kpi:last-child{border-right:0}
+.kpi .n{font-size:38px;font-weight:800;font-stretch:75%;line-height:1}
+.kpi .l{font-size:13.5px;color:var(--muted);margin-top:4px;line-height:1.3}
+.kpi.red .n{color:var(--red)}.kpi.amber .n{color:var(--amber)}
+@media (max-width:820px){.kpis{grid-template-columns:repeat(3,1fr)}.kpi:nth-child(3){border-right:0}.kpi:nth-child(-n+3){border-bottom:1px solid var(--line)}}
+@media (max-width:460px){.kpis{grid-template-columns:repeat(2,1fr)}.kpi{border-right:1px solid var(--line)!important;border-bottom:1px solid var(--line)}.kpi:nth-child(2n){border-right:0!important}}
+
+/* layout */
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin-top:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px;min-width:0}
+.c5{grid-column:span 5}.c7{grid-column:span 7}.c6{grid-column:span 6}.c12{grid-column:span 12}
+@media (max-width:900px){.c5,.c7,.c6{grid-column:span 12}}
+.section-title{margin:34px 0 0;font-stretch:80%;font-weight:800;font-size:26px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+
+/* health checks */
+.checks{list-style:none;margin:0;padding:0}
+.checks li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+.checks li:last-child{border-bottom:0}
+.checks .st{width:12px;height:12px;border-radius:50%;margin-top:5px}
+.checks .t{font-weight:600}
+.checks .d{display:block;font-size:13.5px;color:var(--muted);font-weight:400}
+.checks .v{font-weight:800;font-stretch:78%;font-size:20px;line-height:1.2}
+
+/* attention list */
+.att{list-style:none;margin:0;padding:0}
+.att li{padding:12px 0 12px 14px;border-left:4px solid var(--p1);margin-bottom:10px;background:color-mix(in srgb,var(--p1) 5%,transparent);padding-right:12px;border-radius:0 4px 4px 0}
+.att li.p2{border-left-color:var(--p2);background:color-mix(in srgb,var(--p2) 7%,transparent)}
+.att .row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.att .tag{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}
+.att p{margin:4px 0 0;font-size:14px}
+.att .risk{color:var(--red);font-weight:600}
+
+/* brand status */
+.brandrow{display:grid;grid-template-columns:120px 1fr 34px;gap:10px;align-items:center;margin:12px 0}
+.brandrow .name{font-weight:600;font-stretch:88%}
+.brandrow .n{text-align:right;font-weight:700}
+.stack{display:flex;height:28px;border-radius:3px;overflow:hidden;background:var(--line)}
+.stack span{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;min-width:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin-top:12px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13px}
+.scroll{overflow-x:auto}
+.matrix td,.matrix th{text-align:center}
+.matrix td:first-child,.matrix th:first-child{text-align:left}
+.cell{display:inline-block;min-width:32px;padding:3px 6px;border-radius:3px;font-weight:700}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:10px;color:#fff;white-space:nowrap}
+.req td:nth-child(3){min-width:230px}
+.req td:nth-child(6){min-width:260px;color:var(--muted)}
+
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+select,button{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:6px 10px}
+button{cursor:pointer}
+select:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--p3);outline-offset:2px}
+
+/* action progress */
+.prog{display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.prog .track{flex:1;min-width:200px;height:12px;border-radius:6px;background:var(--line);overflow:hidden;display:flex}
+.prog .track span{display:block}
+.prog b{font-size:28px;font-stretch:75%;font-weight:800}
+footer{margin-top:28px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>GCP brands executive dashboard</h1>
+      <p class="muted" style="margin:6px 0 0">Mooyah, Dunn Brothers Coffee and Rusty Taco</p>
+    </div>
+    <p class="meta">Status as of Wednesday, Sep 23, 2026, from the <a href="https://docs.google.com/spreadsheets/d/1UUKh52qrChg77WMHlu9_w9EXKktXnYanUe717gUwo7M/edit?gid=385484242#gid=385484242" target="_blank" rel="noopener">GCP Enhancement Requests sheet</a>.</p>
+  </header>
+
+  <div class="verdict" role="status">
+    <span class="lamp" aria-hidden="true"></span>
+    <b id="verdictHead"></b>
+    <p id="verdictText"></p>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid">
+    <section class="panel c5">
+      <h2>Health check</h2>
+      <p class="sub">Red needs leadership attention, amber needs a follow-up, green is on track</p>
+      <ul class="checks" id="checks"></ul>
+    </section>
+    <section class="panel c7">
+      <h2>Needs attention: urgent and high-priority items</h2>
+      <p class="sub">All open P1 and P2 requests, with the latest update from the team</p>
+      <ul class="att" id="attention"></ul>
+    </section>
+  </div>
+
+  <h2 class="section-title">Progress by brand</h2>
+  <div class="grid">
+    <section class="panel c7">
+      <h2>Status by brand</h2>
+      <p class="sub" id="brandSub"></p>
+      <div id="brandStatus"></div>
+      <div class="legend" id="statusLegend"></div>
+    </section>
+    <section class="panel c5">
+      <h2>Priority breakdown</h2>
+      <p class="sub">Number of requests by priority and brand</p>
+      <div class="scroll"><table class="matrix" id="priMatrix"></table></div>
+    </section>
+  </div>
+
+  <h2 class="section-title">All requests</h2>
+  <section class="panel" style="margin-top:18px">
+    <div class="filters">
+      <select id="fBrand" aria-label="Filter by brand"><option value="">All brands</option></select>
+      <select id="fPri" aria-label="Filter by priority"><option value="">All priorities</option></select>
+      <select id="fStatus" aria-label="Filter by status"><option value="">All statuses</option></select>
+      <button id="fReset" type="button">Clear filters</button>
+    </div>
+    <div class="scroll"><table class="req" id="reqs"></table></div>
+  </section>
+
+  <h2 class="section-title">GCP action items</h2>
+  <section class="panel" style="margin-top:18px">
+    <div class="prog" id="aiProg"></div>
+    <div class="scroll"><table id="actions"></table></div>
+  </section>
+
+  <footer>Source: GCP Enhancement Requests (Google Sheet). Refreshed weekly before the Friday leadership review.</footer>
+</div>
+<script>
+const TODAY = new Date(2026,8,23);
+const STALE_DAYS = 7;
+const R = [
+ {b:"Mooyah",t:"",sys:"App (back-end)",type:"Enhancement",title:"Kitchen display (KDS) prep area fix",desc:"Plum KDS issues: prep area module enhancement",p:1,guest:"Yes",s:"In Progress",u:"09/22",next:"Development in progress.",owner:"Sohit",note:"Running 9–10 weeks; started when the Riverton store opened."},
+ {b:"Mooyah",t:"4320",sys:"",type:"Enhancement",title:"Show items separately on kitchen screens",desc:"Items need to be unconsolidated on KDS for online, in-store and kiosk orders",p:1,guest:"Yes",s:"In Progress",u:"09/22",next:"Kurt supplied a configuration change; team is testing. Update due 09/24, which decides whether more development is needed.",owner:"Sohit",due:"09/24"},
+ {b:"Mooyah",t:"4325",sys:"",type:"Bug",title:"Items dropping off the fry station screen",desc:"Items being dropped from fry KDS",p:1,guest:"Yes",s:"Under Analysis",u:"09/23",next:"Fix is live at Rancho. Jonathan to validate today; then roll out to other stores.",owner:"Sohit",due:"09/23",mismatch:true},
+ {b:"Mooyah",t:"",sys:"",type:"Enhancement",title:"Full item descriptions on kiosk and online ordering",desc:"Remove character limit on descriptions in Kiosk and Plum Ordering",p:2,guest:"Yes",s:"Under Analysis",u:"09/22",next:"Team to discuss with development and report back by 09/24.",owner:"Ashish Pandey",due:"09/24",note:"Guests can't see full ingredients; possible allergen risk."},
+ {b:"Mooyah",t:"",sys:"Reporting",type:"Enhancement",title:"Labor stats report",desc:"Labor Stats Report",p:3,guest:"No",s:"Under Analysis",u:"09/22",next:"A by-store version exists; meeting needed to show Shane.",owner:"Kunal"},
+ {b:"Mooyah",t:"",sys:"App (back-end)",type:"Project",title:"Inventory rollout",desc:"Mooyah professional inventory rollout",p:3,guest:"No",s:"Under Analysis",u:"09/22",next:"Checking menu-mix pricing, recipe variances and combo setup with Shane.",owner:"Mohit P / Balwin"},
+ {b:"Mooyah",t:"3820",sys:"",type:"Enhancement",title:"Kiosk customize button confusion",desc:"Hide customize button for unselected mods on kiosk",p:4,guest:"",s:"In Progress",u:"09/22",next:"Design review in progress; next meeting 09/24.",owner:"Ashish Pandey"},
+ {b:"Mooyah",t:"",sys:"",type:"Enhancement",title:"Employee retention report",desc:"Employee Retention Report",p:4,guest:"",s:"In Progress",u:"09/22",next:"Design in progress.",owner:"Ashish Pandey"},
+ {b:"Mooyah",t:"",sys:"",type:"Enhancement",title:"Manager access log report",desc:"Manager access log report",p:4,guest:"",s:"In Progress",u:"09/22",next:"Design in progress.",owner:"Ashish Pandey"},
+ {b:"DBC",t:"",sys:"Reporting",type:"Enhancement",title:"Loyalty reporting, phase 2",desc:"Loyalty Reporting Phase 2",p:3,guest:"No",s:"In Progress",u:"09/22",next:"Development in progress. Targeted for Q3.",owner:"Kunal"},
+ {b:"DBC",t:"",sys:"",type:"Enhancement",title:"Mobile app customer journey changes",desc:"Browse without choosing a location, in-app messaging, store selection flow, cart prompts",p:3,guest:"Yes",s:"In Progress",u:"09/22",next:"Design review in progress.",owner:"Yash"},
+ {b:"DBC",t:"",sys:"POS platform",type:"Enhancement",title:"Loyalty pop-up when scanned",desc:"Loyalty Pop Up Window When Scanned",p:3,guest:"No",s:"In Progress",u:"09/22",next:"Design to be reviewed at 09/24 meeting.",owner:"Yash"},
+ {b:"DBC",t:"",sys:"",type:"Enhancement",title:"Holiday and adjusted store hours",desc:"Scheduling adjusted store hours / holiday hours",p:3,guest:"",s:"In Progress",u:"09/22",next:"QA in progress; expected done in sprint ending 09/25.",owner:""},
+ {b:"DBC",t:"",sys:"",type:"Enhancement",title:"Plum Schedules enhancements",desc:"Plum Schedules enhancements",p:3,guest:"",s:"In Progress",u:"09/22",next:"Some items ship in Q3; details in release notes.",owner:""},
+ {b:"DBC",t:"",sys:"",type:"Enhancement",title:"Inventory waste reporting",desc:"Inventory Waste Reporting",p:4,guest:"",s:"In Progress",u:"09/22",next:"Tested internally; part of Q3 release.",owner:"Yash"},
+ {b:"DBC",t:"",sys:"",type:"Enhancement",title:"Alert when a store turns off online ordering",desc:"Email corporate when online ordering is disabled; add to BI reporting",p:4,guest:"",s:"TBD",u:"09/22",next:"Not picked up yet.",owner:"Yash"},
+ {b:"DBC",t:"",sys:"",type:"Enhancement",title:"Future availability",desc:"future availability",p:4,guest:"",s:"Future",u:"09/22",next:"Revisit in future.",owner:""},
+ {b:"DBC",t:"",sys:"",type:"Enhancement",title:"Link loyalty members to POS checks",desc:"POS and loyalty data are separate; can't see which checks belong to loyalty members",p:4,guest:"",s:"Future",u:"09/22",next:"Revisit in future.",owner:"Yash"},
+ {b:"DBC",t:"",sys:"",type:"Enhancement",title:"Gift card functionality",desc:"Gift Card Functionality",p:4,guest:"",s:"Future",u:"09/22",next:"Revisit in future.",owner:"Yash"},
+ {b:"DBC",t:"",sys:"",type:"Enhancement",title:"Gift card funds",desc:"Gift Card Funds",p:4,guest:"",s:"Future",u:"09/22",next:"Revisit in future.",owner:"Yash"},
+ {b:"DBC",t:"",sys:"",type:"Enhancement",title:"Favorite drinks in app",desc:"Mark item as favorite",p:4,guest:"",s:"Future",u:"09/22",next:"Revisit in future.",owner:"Yash"},
+ {b:"Rusty Taco",t:"",sys:"",type:"",title:"Greenville bank account not receiving deposits",desc:"Greenville Bank Account no deposits",p:4,guest:"",s:"In Progress",u:"09/22",next:"Chris is working with Till.",owner:"Chris (US)"}
+];
+
+const A = [
+ {task:"Define Plum deliverables progress report for Michael",owner:"Mark",s:"TODO",c:"Set up meeting with Mark"},
+ {task:"KPI report for support tickets (volume, resolution time, escalations)",owner:"Mark",s:"TODO",c:""},
+ {task:"Survey sent after every closed visit",owner:"Vijay",s:"Done",c:"Already enabled; confirm with Vijay and tell Ajay"},
+ {task:"Call customers after each ticket is closed",owner:"Mark's Philippines team",s:"TODO",c:"Sambhav to set up meeting with Mark"},
+ {task:"Dedicated inventory specialist to work with Shane",owner:"Ajay Bisht",s:"TODO",c:"Assign senior owner to validate Mooyah inventory numbers"},
+ {task:"List outstanding POS issues with next steps",owner:"Shane / Mark",s:"TODO",c:"Review GCP sheet for remaining issues"},
+ {task:"Reset Mooyah Plum POS rollout schedule",owner:"Chris / Shane",s:"TODO",c:""},
+ {task:"POS training program for customers",owner:"Vijay",s:"TBD",c:""},
+ {task:"Weekly Freshdesk issues report every Friday to Ajay and Mooyah",owner:"Mark / Shane / Ajay B",s:"TODO",c:"Scope question open: support issues only, or high-priority deliverables too?"},
+ {task:"Schedule weekly GCP check-in (Shane, Mark, Chris, Jonathan)",owner:"Sambhav / Jonathan",s:"TODO",c:"Collect availability"},
+ {task:"Zoom with Philippines team so Shane understands support structure",owner:"Mark / Shane",s:"TODO",c:""},
+ {task:"GCP email addresses for Mark and Philippines team",owner:"Sambhav / Jonathan",s:"TODO",c:"Email Anand to request addresses"},
+ {task:"Roll out Freshdesk ticketing to all franchisees",owner:"Shane",s:"TODO",c:"Tell other brands to report through Freshdesk; define process"}
+];
+
+const BRANDS=["Mooyah","DBC","Rusty Taco"];
+const BL={"Mooyah":"Mooyah","DBC":"Dunn Brothers","Rusty Taco":"Rusty Taco"};
+const STATUSES=["In Progress","Under Analysis","TBD","Future"];
+const SCOL={"In Progress":"var(--prog)","Under Analysis":"var(--anal)","TBD":"var(--tbd)","Future":"var(--fut)"};
+const PCOL={1:"var(--p1)",2:"var(--p2)",3:"var(--p3)",4:"var(--p4)"};
+const PL={1:"P1 Urgent",2:"P2 High",3:"P3 Medium",4:"P4 Low"};
+const RAG={red:"var(--red)",amber:"var(--amber)",green:"var(--green)"};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $=id=>document.getElementById(id);
+const age=u=>{const [m,d]=u.split("/").map(Number);return Math.round((TODAY-new Date(2026,m-1,d))/864e5)};
+const fd=t=>t?`<a href="https://plumpos.freshdesk.com/a/tickets/${t}" target="_blank" rel="noopener">FD ${t}</a>`:"";
+
+const active=R.filter(r=>r.s!=="Future");
+const p1=R.filter(r=>r.p===1), p2=R.filter(r=>r.p===2);
+const guest=active.filter(r=>r.guest==="Yes");
+const aOpen=A.filter(a=>a.s!=="Done"), aDone=A.filter(a=>a.s==="Done");
+const unowned=R.filter(r=>!r.owner), stale=R.filter(r=>age(r.u)>STALE_DAYS);
+
+// verdict
+$("verdictHead").textContent=p1.length?`Attention needed: ${p1.length} urgent issues open at Mooyah`:"On track";
+$("verdictText").textContent=`All ${p1.length} urgent issues are with Mooyah's kitchen display screens and affect guests. A fix for dropped fry-station orders went live at one store today; results on the other two are due Sep 24. Dunn Brothers and Rusty Taco have no urgent items.`;
+
+// KPIs
+const K=[
+ {n:R.length,l:"Total requests",c:""},
+ {n:active.length,l:"Active (excludes parked)",c:""},
+ {n:p1.length,l:"Urgent (P1)",c:"red"},
+ {n:p2.length,l:"High priority (P2)",c:"amber"},
+ {n:guest.length,l:"Affecting guests",c:"amber"},
+ {n:`${aDone.length}/${A.length}`,l:"Action items done",c:"amber"}
+];
+$("kpis").innerHTML=K.map(k=>`<div class="kpi ${k.c}"><div class="n">${k.n}</div><div class="l">${k.l}</div></div>`).join("");
+
+// health checks
+const C=[
+ {s:"red",t:"Urgent issues (P1)",d:"Mooyah kitchen screens; the prep-area issue has run 9–10 weeks",v:p1.length},
+ {s:"amber",t:"High-priority issues (P2)",d:"Menu descriptions cut off on kiosk and online; possible allergen risk",v:p2.length},
+ {s:"amber",t:"Leadership action items still open",d:"None have due dates yet, so slippage can't be tracked",v:`${aOpen.length} of ${A.length}`},
+ {s:unowned.length?"amber":"green",t:"Requests with no owner",d:unowned.map(r=>r.title).join("; "),v:unowned.length},
+ {s:stale.length?"amber":"green",t:"Requests not updated in 7+ days",d:stale.length?"":"Every request updated this week",v:stale.length},
+ {s:"green",t:"Q3 release on schedule",d:"Dunn Brothers loyalty reporting, waste reporting and scheduling items",v:"Sep 30"}
+];
+$("checks").innerHTML=C.map(c=>`<li><span class="st" style="background:${RAG[c.s]}" aria-label="${c.s}"></span><span class="t">${esc(c.t)}<span class="d">${esc(c.d)}</span></span><span class="v" style="color:${RAG[c.s]}">${c.v}</span></li>`).join("");
+
+// attention list (exec wording)
+const EXEC={
+ 0:{what:"Kitchen display prep-area issue",now:"Development under way.",risk:"Open 9–10 weeks with broad impact on store operations."},
+ 1:{what:"Orders combined on kitchen screens",now:"A configuration change is being tested. Result due Sep 24 decides whether more development is needed."},
+ 2:{what:"Orders dropping off the fry-station screen",now:"Fix went live at Rancho today and is being validated. Other stores follow once confirmed."},
+ 3:{what:"Menu descriptions cut off on kiosk and online ordering",now:"Team reporting back on a fix by Sep 24.",risk:"Guests can't see full ingredients; possible allergen exposure."}
+};
+$("attention").innerHTML=R.filter(r=>r.p<=2).map(r=>{const i=R.indexOf(r),e=EXEC[i]||{what:r.title,now:r.next};
+  return `<li class="p${r.p}"><div class="row"><h3>${esc(e.what)}</h3><span class="tag">P${r.p} · ${BL[r.b]}${r.t?" · "+fd(r.t):""}</span></div>
+  <p>${esc(e.now)} <span class="muted">Owner: ${esc(r.owner)}.</span></p>${e.risk?`<p class="risk">${esc(e.risk)}</p>`:""}</li>`}).join("");
+
+// status by brand
+$("brandSub").textContent=`${R.length} requests across ${BRANDS.length} brands`;
+const maxB=Math.max(...BRANDS.map(b=>R.filter(r=>r.b===b).length));
+$("brandStatus").innerHTML=BRANDS.map(b=>{const rs=R.filter(r=>r.b===b);
+  const segs=STATUSES.map(s=>{const n=rs.filter(r=>r.s===s).length;return n?`<span style="width:${n/rs.length*100}%;background:${SCOL[s]}" title="${s}: ${n}">${n}</span>`:""}).join("");
+  return `<div class="brandrow"><span class="name">${BL[b]}</span><div class="stack" style="width:${Math.max(rs.length/maxB*100,8)}%">${segs}</div><span class="n">${rs.length}</span></div>`}).join("");
+$("statusLegend").innerHTML=STATUSES.map(s=>`<span><i style="background:${SCOL[s]}"></i>${s==="Future"?"Parked for later":s} (${R.filter(r=>r.s===s).length})</span>`).join("");
+
+// priority matrix
+$("priMatrix").innerHTML=`<thead><tr><th>Priority</th>${BRANDS.map(b=>`<th>${BL[b]}</th>`).join("")}<th>Total</th></tr></thead><tbody>`+
+ [1,2,3,4].map(p=>`<tr><td><span class="dot" style="background:${PCOL[p]}"></span>${PL[p]}</td>${BRANDS.map(b=>{const n=R.filter(r=>r.b===b&&r.p===p).length;
+   return `<td>${n?`<span class="cell" style="background:color-mix(in srgb,${PCOL[p]} ${p<=2?28:18}%,transparent)">${n}</span>`:'<span class="muted">–</span>'}</td>`}).join("")}<td><b>${R.filter(r=>r.p===p).length}</b></td></tr>`).join("")+
+ `<tr><td><b>Total</b></td>${BRANDS.map(b=>`<td><b>${R.filter(r=>r.b===b).length}</b></td>`).join("")}<td><b>${R.length}</b></td></tr></tbody>`;
+
+// requests table
+BRANDS.forEach(b=>$("fBrand").insertAdjacentHTML("beforeend",`<option value="${b}">${BL[b]}</option>`));
+[1,2,3,4].forEach(p=>$("fPri").insertAdjacentHTML("beforeend",`<option value="${p}">${PL[p]}</option>`));
+STATUSES.forEach(s=>$("fStatus").insertAdjacentHTML("beforeend",`<option value="${s}">${s}</option>`));
+function drawReqs(){const fb=$("fBrand").value,fp=$("fPri").value,fs=$("fStatus").value;
+  const rs=R.filter(r=>(!fb||r.b===fb)&&(!fp||r.p==fp)&&(!fs||r.s===fs)).sort((a,b)=>a.p-b.p);
+  $("reqs").innerHTML=`<thead><tr><th>Brand</th><th>Priority</th><th>Request</th><th>Status</th><th>Owner</th><th>Latest update</th></tr></thead><tbody>`+
+   (rs.length?rs.map(r=>`<tr><td>${BL[r.b]}</td><td><span class="pill" style="background:${PCOL[r.p]}">P${r.p}</span></td><td>${esc(r.title)}${r.t?` <span class="muted">${fd(r.t)}</span>`:""}</td><td><span class="dot" style="background:${SCOL[r.s]}"></span>${r.s}</td><td>${r.owner?esc(r.owner):'<span style="color:var(--red)">No owner</span>'}</td><td>${r.u} · ${esc(r.next)}</td></tr>`).join("")
+   :`<tr><td colspan="6" class="muted">No requests match these filters. Clear filters to see all ${R.length}.</td></tr>`)+`</tbody>`;}
+["fBrand","fPri","fStatus"].forEach(id=>$(id).addEventListener("change",drawReqs));
+$("fReset").addEventListener("click",()=>{["fBrand","fPri","fStatus"].forEach(id=>$(id).value="");drawReqs()});
+drawReqs();
+
+// action items
+const tbd=A.filter(a=>a.s==="TBD").length, todo=A.filter(a=>a.s==="TODO").length;
+$("aiProg").innerHTML=`<b>${aDone.length} of ${A.length}</b><div class="track" aria-label="${aDone.length} of ${A.length} done"><span style="width:${aDone.length/A.length*100}%;background:var(--green)"></span><span style="width:${tbd/A.length*100}%;background:var(--tbd)"></span></div><span class="muted">${aDone.length} done, ${todo} to do, ${tbd} to be decided</span>`;
+const AS={"TODO":"var(--p4)","Done":"var(--green)","TBD":"var(--tbd)"};
+const order={"TODO":0,"TBD":1,"Done":2};
+$("actions").innerHTML=`<thead><tr><th>Task</th><th>Owner</th><th>Status</th><th>Note</th></tr></thead><tbody>`+
+ [...A].sort((a,b)=>order[a.s]-order[b.s]).map(a=>`<tr><td>${esc(a.task)}</td><td>${esc(a.owner)}</td><td><span class="pill" style="background:${AS[a.s]}">${a.s==="TODO"?"To do":a.s}</span></td><td class="muted">${esc(a.c)}</td></tr>`).join("")+`</tbody>`;
+</script>
+</body>
+</html>
